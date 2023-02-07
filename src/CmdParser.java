@@ -1,23 +1,27 @@
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 final class CmdParser {
     private final String[] args;
     private TypeOfSort typeOfSort;
     private TypeOfData typeOfData;
-    private String outputFile;
-    private final LinkedList<String> inputFiles = new LinkedList<>();
+    //private String outputFile;
+    private File outputFile;
+    private final ArrayList<String> inputFilesNames = new ArrayList<>();
+    private ArrayList<File> inputFiles;
 
 
     public enum TypeOfSort {
-        A,
-        D
+        ASC,
+        DESC
     }
 
 
     public enum TypeOfData {
-        I,
-        S
+        INT,
+        STRING
     }
 
     public CmdParser(String[] args) throws Exception {
@@ -32,46 +36,63 @@ final class CmdParser {
         parseTypeOfData(args);
         parseTypeOfSort(args);
 
-        boolean sortOption;
+        boolean sortOrder;
 
         if (typeOfSort == null) {
-            typeOfSort = TypeOfSort.A;
-            sortOption = false;
+            typeOfSort = TypeOfSort.ASC;
+            sortOrder = false;
         } else {
-            sortOption = true;
+            sortOrder = true;
         }
 
         int outIndex;
-        if (sortOption) {
+        if (sortOrder) {
             outIndex = 2;
         } else {
             outIndex = 1;
         }
-        outputFile = args[outIndex];
-        inputFiles.addAll(Arrays.asList(args).subList(outIndex + 1, args.length));
+        outputFile = new File(args[outIndex]);
+        if (!outputFile.exists()) {
+            outputFile.createNewFile();
+        }
+        inputFilesNames.addAll(Arrays.asList(args).subList(outIndex + 1, args.length));
     }
 
-    private void parseTypeOfData(String[] args) throws Exception {
-        if (args[0].equals("-s")||args[1].equals("-s")) {
-            typeOfData =TypeOfData.S;
-        } else if (args[0].equals("-i")||args[1].equals("-i")) {
-            typeOfData = TypeOfData.I;
-        } else throw new Exception("Введены неверные аргументы");
-    }
-
-    private void parseTypeOfSort(String[] args) throws Exception {
-        if (args[0].equals("-a")) {
-            typeOfSort = TypeOfSort.A;
-        } else if (args[0].equals("-d")) {
-            typeOfSort = TypeOfSort.D;
+    private void createInputFiles(ArrayList<String> inputFilesNames) throws IOException {
+        inputFiles = new ArrayList<>();
+        for (String fileName: inputFilesNames){
+            File file = new File(fileName);
+            if(file.canRead())
+                inputFiles.add(file);
+        }
+        if (inputFiles.size() == 0) {
+            throw new IOException("Все входные файли недоступны для чтения");
         }
     }
 
-    public String getOutputFileName() {
+
+
+    private void parseTypeOfData(String[] args) throws Exception {
+        if (args[0].equals("-s")||args[1].equals("-s")) {
+            typeOfData =TypeOfData.STRING;
+        } else if (args[0].equals("-i")||args[1].equals("-i")) {
+            typeOfData = TypeOfData.INT;
+        } else throw new Exception("Введены неверные аргументы");
+    }
+
+    private void parseTypeOfSort(String[] args) {
+        if (args[0].equals("-a")) {
+            typeOfSort = TypeOfSort.ASC;
+        } else if (args[0].equals("-d")) {
+            typeOfSort = TypeOfSort.DESC;
+        }
+    }
+
+    public File getOutputFile() {
         return outputFile;
     }
 
-    public LinkedList<String> getInputFileNames() {
+    public ArrayList<File> getInputFiles() {
         return inputFiles;
     }
 
