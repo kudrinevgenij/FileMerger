@@ -1,9 +1,11 @@
+package main.java;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-final class CmdParser {
+public final class CmdParser {
     private final String[] args;
     private TypeOfSort typeOfSort;
     private TypeOfData typeOfData;
@@ -56,6 +58,7 @@ final class CmdParser {
             outputFile.createNewFile();
         }
         inputFilesNames.addAll(Arrays.asList(args).subList(outIndex + 1, args.length));
+        createInputFiles(inputFilesNames);
     }
 
     private void createInputFiles(ArrayList<String> inputFilesNames) throws IOException {
